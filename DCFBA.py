@@ -20,8 +20,8 @@ def DCFBA(Q):
 
     x = cp.Variable(Q['tau']+1) #metabolite concentrations
 
-    obj = cp.Maximize(x @ np.ones(Q['tau']+1)) #objective
-    
+    obj = cp.Maximize(x[Q['tau']]) #objective
+
     dyncon = [
             z[:,t+1] - z[:,t] == Q['dt'] * Q['S'] @ v[:,t] for t in range(Q['tau'])
         ] #dynamic constraints
@@ -50,17 +50,23 @@ def DCFBA(Q):
             z[:,t] <= Q['zU'] for t in range(Q['tau']+1)
         ] #upper metabolite limits
 
-    soccon = [
-        cp.SOC(Q['mu'][i] * z[Q['sig'][Q['MM'][i]],t] - Q['k'][i] * v[Q['MM'][i],t] + Q['mu'][i] * Q['k'][i]*x[t],
-               cp.vstack((Q['mu'][i] * z[Q['sig'][Q['MM'][i]],t] , Q['k'][i] * v[Q['MM'][i],t] , Q['mu'][i] * Q['k'][i]*x[t]))) for i in range(Q['MMlen']) for t in range(Q['tau'])
-        ] #SOC constraints for reactions with single Michaelis-Menten kinetics, approximated by the Contois function
-            
+    lcon5 = [
+            cp.abs(v[:,t+1] - v[:,t]) <= Q['dvmax'] for t in range(Q['tau']-1)
+        ] #rate constraints on v
 
-    prob = cp.Problem(obj, lcon1 + lcon2 + lcon3 + lcon4 + dyncon + dynconx + ICcon + soccon) #form problem
+
+    soccon = []
+    for i in range(Q['MMlen']):
+        for t in range(Q['tau']):
+            soccon += [
+                cp.SOC(Q['mu'][i] * z[Q['sig'][Q['MM'][i]],t] - Q['k'][i] * v[Q['MM'][i],t] + Q['mu'][i] * Q['k'][i]*x[t],
+                cp.vstack((Q['mu'][i] * z[Q['sig'][Q['MM'][i]],t] , Q['k'][i] * v[Q['MM'][i],t] , Q['mu'][i] * Q['k'][i]*x[t])))
+                ] #SOC constraints for reactions with single Michaelis-Menten kinetics, approximated by the Contois function
+     
+    prob = cp.Problem(obj, lcon1 + lcon2 + lcon3 + lcon4 + lcon5 + dyncon + dynconx + ICcon + soccon) #form problem
 
     prob.solve(solver=cp.GUROBI,verbose=True) #solve the problem
-    # prob.solve(solver=cp.GUROBI) #solve the problem
-    
+
     sol = {'obj':obj.value,'v':v.value,'z':z.value,'x':x.value}
             
     return sol

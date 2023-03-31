@@ -133,9 +133,10 @@ def Cases(caseno):
         #Parameters for dynamic CFBA
         dt = 0.001 #time step
         tau = 500 #number of time steps
-        x0 = 1 #initial biomass concentration
-        z0 = np.zeros(m) #initial concentrations of other metabolites
-        bmdeath = 1 + np.sin((10/tau) * np.arange(tau)) #rate of biomass death
+        x0 = 0.001 #initial biomass concentration
+        z0 = np.ones(m) #initial concentrations of other metabolites
+        bmdeath = 0*np.ones(tau) #rate of biomass death
+        dvmax = 500*dt*np.ones(r)
 
         ################################################################
         ################################################################
@@ -170,7 +171,7 @@ def Cases(caseno):
              'vt':vt,'zt':zt,'Tv':Tv,'Tz':Tz,'dTv':dTv,'dTz':dTz,'bigM':bigM,
              'MM':MM,'MMlen':MMlen,'noMM':noMM,'eta':eta,'wz':wz,'wv':wv,
              'rev':rev,'irrev':irrev,
-             'dt':dt,'tau':tau,'bmind':bmind,'x0':x0,'z0':z0,'bmdeath':bmdeath
+             'dt':dt,'tau':tau,'bmind':bmind,'x0':x0,'z0':z0,'bmdeath':bmdeath,'dvmax':dvmax
              }
             
     return Q

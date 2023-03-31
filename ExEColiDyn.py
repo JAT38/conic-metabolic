@@ -13,6 +13,8 @@ taylor.a.josh@gmail.com
 import numpy as np
 import matplotlib.pyplot as plt
 import time
+import cobra
+from cobra.io import load_model
 
 # data and model files
 from ExEColiData import Cases
@@ -26,13 +28,14 @@ sT = 50 #time horizon of each instance is i*sT, for i=1,...,nT
 times = np.zeros(nT) #record time taken
 periods = np.zeros(nT) #number of periods
 
+
 for i in range(nT):
     print()
     print('Iteration:')
     print(i)
     print()
     Q['tau'] = sT*(i+1) #time horizon
-    Q['bmdeath'] = 1 + np.sin((10/Q['tau']) * np.arange(Q['tau'])) #trajectory of biomass death rate, as a fn. of tau
+    Q['bmdeath'] = 0*np.ones(Q['tau'])
     start = time.time() #time solver
     solDCFBA = DCFBA(Q)
     times[i] = time.time() - start
@@ -45,8 +48,8 @@ v = solDCFBA['v']
 
 #indices of concentrations to plot
 mindcit = Q['sig'][Q['MM'][2]]
-mindglu = Q['sig'][Q['MM'][11]]
 mindglnc = Q['sig'][Q['MM'][8]]
+mindglu = Q['sig'][Q['MM'][11]]
 
 #concentrations to plot
 zcit = z[mindcit,0:Q['tau']]
@@ -77,7 +80,6 @@ ax1.set(xlim=(0, Q['dt'] * (Q['tau']-1)))
 plt.xlabel('Hours',fontsize='large')
 plt.ylabel('Concentration (mM)',fontsize='large')
 plt.legend(fontsize='large')
-plt.show()
 
 
 fig2, ax2 = plt.subplots(figsize=(6, 4))
@@ -105,7 +107,7 @@ ax4.set(xlim=(0, Q['dt'] * (Q['tau']-1)))
 ax4.plot(tt, vcit, 'k-',label='ACONTa')
 ax4.plot(tt, vglun, 'k--',label='GLUN')
 plt.ylabel('Flux (mmol/g dw/h)',fontsize='large')
-
 plt.xlabel('Hours',fontsize='large')
 plt.legend(fontsize='large')
+
 plt.show()
