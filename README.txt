@@ -1,6 +1,6 @@
 Summary of Python code for generating all examples in:
 
-Conic analysis of nonlinear metabolic networks
+Convex Representation of Metabolic Networks with Michaelis-Menten Kinetics
 Joshua A. Taylor, Alain Rapaport, and Denis Dochain
 Submitted
 
